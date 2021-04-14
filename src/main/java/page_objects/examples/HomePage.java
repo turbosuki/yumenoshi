@@ -9,6 +9,7 @@ public class HomePage
     private WebDriver driver;
     private TestContext context;
     private By formAuthenticationLink = By.linkText("Form Authentication");
+    private By fileUploadLink = By.linkText("File Upload");
 
     public HomePage(TestContext context)
     {
@@ -20,6 +21,12 @@ public class HomePage
     {
         driver.findElement(formAuthenticationLink).click();
         return new LoginPage(context);
+    }
+
+    public FileUploadPage clickFileUploadLink()
+    {
+        driver.findElement(fileUploadLink).click();
+        return new FileUploadPage(context);
     }
 
     public HomePage go()
