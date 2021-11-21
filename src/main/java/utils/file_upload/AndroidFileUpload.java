@@ -17,7 +17,6 @@ public class AndroidFileUpload implements IFileUpload
     private AndroidDriver<WebElement> driver;
     private WebDriverWait wait;
     private By fileIcon = By.xpath("//*[@text='Files']");
-    private By allowButton = MobileBy.xpath("//*[@class='android.widget.Button'][2]");
 
     public AndroidFileUpload(WebDriver driver)
     {
@@ -47,7 +46,6 @@ public class AndroidFileUpload implements IFileUpload
         }
 
         driver.context("NATIVE_APP");
-        driver.findElement(allowButton).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(fileIcon));
         driver.findElement(fileIcon).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(fileThumbnail));

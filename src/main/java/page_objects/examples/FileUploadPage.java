@@ -15,11 +15,11 @@ public class FileUploadPage
     private By uploadedFilesText = By.id("uploaded-files");
     private By title = By.cssSelector("h3");
 
-    public FileUploadPage(TestContext context)
+    public FileUploadPage(TestContext context, WebDriver driver)
     {
         this.context = context;
-        this.driver = context.getDriver();
-        this.seleniumHelper = new SeleniumHelper(context);
+        this.driver = driver;
+        this.seleniumHelper = new SeleniumHelper(driver);
     }
 
     public FileUploadPage uploadFile(String filepath)

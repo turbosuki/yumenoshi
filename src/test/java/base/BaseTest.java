@@ -1,32 +1,82 @@
 package base;
 
+import org.openqa.selenium.WebDriver;
+import org.testng.ITestResult;
 import org.testng.annotations.*;
+import utils.BrowserStackUtils;
+import utils.DriverFactory;
 import utils.TestConfig;
 import utils.TestContext;
 
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 
 public class BaseTest
 {
-    protected TestContext context;
+    protected static ThreadLocal<TestContext> testContext = new ThreadLocal<TestContext>();
+    protected static ThreadLocal<WebDriver> driver = new ThreadLocal<WebDriver>();
+    private BrowserStackUtils browserStackUtils = new BrowserStackUtils();
 
     @Parameters({"browser", "remote"})
-    @BeforeClass()
-    public void initialiseTest(@Optional("default") String browser, @Optional("false") String remoteExec)
-            throws MalformedURLException
+    @BeforeMethod(alwaysRun = true)
+    public void initialiseTest(@Optional("default") String browser, @Optional("false") String remoteExec, Method method)
     {
-        TestConfig config = new TestConfig().initialiseTestConfig();
-        config.setRemoteExec(remoteExec);
-        config.setBrowser(browser);
-        context = new TestContext(config);
+        TestConfig config = TestConfig.getInstance()
+                                      .setRemoteExec(remoteExec)
+                                      .setBrowser(browser)
+                                      .setBuildName();
+
+        testContext.set(new TestContext()
+                .setTestConfig(config)
+                .setTestMethodName(method.getName()));
+
+        driver.set(DriverFactory.initialiseDriver(getContext()));
+
+        getContext().setFileUploader(driver.get());
     }
 
-    @AfterClass
+    @AfterMethod
     public void teardown()
     {
-        if (context.getDriver() != null)
+        getDriver().quit();
+    }
+
+    @AfterMethod
+    public void tagTestSessionOnBrowserStack(ITestResult result)
+    {
+        if (getContext().getConfig()
+                        .getRemoteExec()
+                        .equals("true") && result.isSuccess())
         {
-            context.getDriver().quit();
+            browserStackUtils.postPassedTestStatus(getContext(), result);
+        } else if (getContext().getConfig()
+                               .getRemoteExec()
+                               .equals("true") && !result.isSuccess())
+        {
+            browserStackUtils.postFailedTestStatus(getContext(), result);
         }
+    }
+
+    @AfterMethod
+    public void reportTestDurationAndFailureReason(ITestResult result)
+    {
+        if (result.isSuccess())
+        {
+            System.out.println(result.getName() + " passed in " + (result.getEndMillis() - result.getStartMillis()) + "ms");
+        }
+        else if (!result.isSuccess())
+        {
+            System.out.println(result.getName() + " failed due to error: " + result.getThrowable().getMessage());
+        }
+    }
+
+    protected TestContext getContext()
+    {
+        return testContext.get();
+    }
+
+    protected WebDriver getDriver()
+    {
+        return driver.get();
     }
 }

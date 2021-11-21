@@ -11,22 +11,22 @@ public class HomePage
     private By formAuthenticationLink = By.linkText("Form Authentication");
     private By fileUploadLink = By.linkText("File Upload");
 
-    public HomePage(TestContext context)
+    public HomePage(TestContext context, WebDriver driver)
     {
         this.context = context;
-        this.driver = context.getDriver();
+        this.driver = driver;
     }
 
     public LoginPage clickFormAuthenticationLink()
     {
         driver.findElement(formAuthenticationLink).click();
-        return new LoginPage(context);
+        return new LoginPage(context, driver);
     }
 
     public FileUploadPage clickFileUploadLink()
     {
         driver.findElement(fileUploadLink).click();
-        return new FileUploadPage(context);
+        return new FileUploadPage(context, driver);
     }
 
     public HomePage go()

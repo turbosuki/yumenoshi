@@ -10,19 +10,12 @@ import static org.testng.Assert.assertTrue;
 
 public class LoginTest extends BaseTest
 {
-    private HomePage homePage;
-    private SecureAreaPage secureAreaPage;
-
-    @BeforeClass
-    public void pageSetup()
-    {
-        homePage = new HomePage(context);
-        secureAreaPage = new SecureAreaPage(context);
-    }
-
     @Test
     public void testSuccessfulLogin()
     {
+        HomePage homePage = new HomePage(getContext(), getDriver());
+        SecureAreaPage secureAreaPage = new SecureAreaPage(getContext(), getDriver());
+
         homePage.go()
                 .clickFormAuthenticationLink()
                 .setUsername("tomsmith")

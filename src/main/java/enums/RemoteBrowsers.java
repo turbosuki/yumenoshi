@@ -86,12 +86,11 @@ public enum RemoteBrowsers
     private static DesiredCapabilities getAndroidChromeCaps()
     {
         DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setCapability("os_version", "9.0");
-        caps.setCapability("device", "Samsung Galaxy Note 10");
+        caps.setCapability("os_version", "10.0");
+        caps.setCapability("device", "Samsung Galaxy S20");
         caps.setCapability("real_mobile", "true");
         caps.setCapability("browserstack.local", "false");
-        caps.setCapability("browserstack.console", "errors");
-        caps.setCapability("appium:chromeOptions", ImmutableMap.of("w3c", false));
+
         return caps;
     }
 

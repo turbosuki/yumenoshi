@@ -24,8 +24,6 @@ The newly created `application.properties` file should be populated as follows:
 
 - `baseUrl=http://projecturl` (base url for deployed project, in this case we are using https://the-internet.herokuapp.com/)
 
-- `seleniumHubUrl=http://huburl` (if choosing to use Selenium hub for execution, the URL should be here)
-
 - `browserStackUsername=exampleusername` (the BrowserStack username for the project)
 
 - `browserStackKey=12345` (the BrowserStack key for the project)
@@ -56,15 +54,6 @@ To access values stored in the `application.properties` file, the TestConfig cla
 ```
 testConfig.getBaseUrl();
 ```
-
-## Selenium Grid
-
-A Selenium Grid can be spun up by executing the following command:
-```
-docker-compose -f docker-compose.yml up
-```
-
-The RemoteWebDriver can use this by providing the URL `http://localhost:4444/wd/hub` when creating it.
 
 ## Page Objects
 

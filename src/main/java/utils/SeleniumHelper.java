@@ -1,7 +1,9 @@
 package utils;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -9,38 +11,54 @@ import java.util.concurrent.TimeUnit;
 
 public class SeleniumHelper
 {
-    private TestContext context;
     private WebDriver driver;
-    private final int WAIT_TIMEOUT = 5;
+    private final int WAIT_TIMEOUT = 30;
+    private WebDriverWait wait;
 
-    public SeleniumHelper(TestContext context)
+    public SeleniumHelper(WebDriver driver)
     {
-        this.context = context;
-        this.driver = context.getDriver();
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, WAIT_TIMEOUT);
     }
 
     public void waitForElementToBeInvisible(By locator)
     {
-        context.getDriver().manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
-        new WebDriverWait(driver, WAIT_TIMEOUT)
-                .until(ExpectedConditions.invisibilityOfElementLocated(locator));
-        context.getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        if (!driver.findElements(locator).isEmpty())
+        {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(locator));
+        }
     }
 
     public void waitForElementToBePresent(By locator)
     {
-        new WebDriverWait(driver, WAIT_TIMEOUT)
-                .until(ExpectedConditions.visibilityOfElementLocated(locator));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+    }
+
+    public void waitForElementToBeClickable(By locator)
+    {
+        wait.until(ExpectedConditions.elementToBeClickable(locator));
+    }
+
+    public void waitForPageLoad()
+    {
+        wait.until((ExpectedCondition<Boolean>) wd -> ((JavascriptExecutor) wd).executeScript("return document.readyState").equals("complete"));
+    }
+
+    public void waitForTextNotToBe(By locator, String text)
+    {
+        wait.until(ExpectedConditions.not(ExpectedConditions.textToBe(locator, text)));
+    }
+
+    public void waitForTextToBe(By locator, String text)
+    {
+        wait.until(ExpectedConditions.textToBe(locator, text));
     }
 
     public boolean isElementPresent(By locator)
     {
-        driver.manage().timeouts().implicitlyWait(3000, TimeUnit.MILLISECONDS);
-
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
         boolean isPresent = !driver.findElements(locator).isEmpty();
-
-        driver.manage().timeouts().implicitlyWait(Integer.parseInt(context.getConfig().getImplicitWait()),
-                TimeUnit.MILLISECONDS);
+        driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
 
         return isPresent;
     }

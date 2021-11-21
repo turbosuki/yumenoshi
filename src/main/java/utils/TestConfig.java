@@ -3,73 +3,107 @@ package utils;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class TestConfig
 {
     private String implicitWait;
     private String baseUrl;
-    private String seleniumHubUrl;
     private String browserStackUrl;
     private Config config;
     private String defaultLocalBrowser;
     private String remoteExec;
     private String browser;
+    private static TestConfig testConfig;
+    private String buildName;
 
-    public TestConfig initialiseTestConfig()
+    public TestConfig setBuildName()
+    {
+        if (buildName == null)
+        {
+            Date date = new Date();
+            DateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy-HHmmss");
+            this.buildName = "test_run-" + dateFormatter.format(date);
+        }
+        return this;
+    }
+
+    public String getBuildName()
+    {
+        return buildName;
+    }
+
+    private TestConfig()
+    {
+
+    }
+
+    public static TestConfig getInstance()
+    {
+        if (testConfig == null)
+        {
+            testConfig = new TestConfig().initialiseTestConfigFromPropertiesFile();
+        }
+
+        return testConfig;
+    }
+
+    public TestConfig initialiseTestConfigFromPropertiesFile()
     {
         config = ConfigFactory.load();
         setBaseUrl();
-        setSeleniumHubUrl();
         setBrowserStackUrl();
         setImplicitWait();
         setDefaultLocalBrowser();
         return this;
     }
 
-    private void setBaseUrl()
+    private TestConfig setBaseUrl()
     {
         baseUrl = config.getString("baseUrl");
+        return this;
     }
 
-    private void setSeleniumHubUrl()
-    {
-        if (config.hasPath("seleniumHubUrl"))
-        {
-            seleniumHubUrl = config.getString("seleniumHubUrl");
-        }
-    }
-
-    private void setDefaultLocalBrowser()
+    private TestConfig setDefaultLocalBrowser()
     {
         if (config.hasPath("defaultLocalBrowser"))
         {
             defaultLocalBrowser = config.getString("defaultLocalBrowser");
         }
+        return this;
     }
 
-    private void setBrowserStackUrl()
+    private TestConfig setBrowserStackUrl()
     {
         browserStackUrl = "https://" + config.getString("browserStackUsername") + ":" +
                 config.getString("browserStackKey") + "@hub-cloud.browserstack.com/wd/hub";
+        return this;
     }
 
-    private void setImplicitWait()
+    private TestConfig setImplicitWait()
     {
         implicitWait = config.getString("implicitWait");
+        return this;
     }
 
-    public void setRemoteExec(String remote)
+    public TestConfig setRemoteExec(String remote)
     {
         remoteExec = remote;
+        return this;
     }
 
-    public void setDefaultLocalBrowser(String browser)
+    public TestConfig setDefaultLocalBrowser(String browser)
     {
         defaultLocalBrowser = browser;
+        return this;
     }
 
-    public void setBrowser(String browser)
+    public TestConfig setBrowser(String browser)
     {
         this.browser = browser;
+        return this;
     }
 
     public String getBaseUrl()
@@ -77,14 +111,19 @@ public class TestConfig
         return baseUrl;
     }
 
-    public String getSeleniumHubUrl()
-    {
-        return seleniumHubUrl;
-    }
-
     public String getBrowserStackUrl()
     {
         return browserStackUrl;
+    }
+
+    public String getBrowserStackUsername()
+    {
+        return config.getString("browserStackUsername");
+    }
+
+    public String getBrowserStackKey()
+    {
+        return config.getString("browserStackKey");
     }
 
     public String getImplicitWait()

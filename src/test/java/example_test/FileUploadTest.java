@@ -15,16 +15,12 @@ public class FileUploadTest extends BaseTest
     private FileUploadPage fileUploadPage;
     private GetFilePath getFilePath = new GetFilePath();
 
-    @BeforeClass
-    public void pageSetup()
-    {
-        homepage = new HomePage(context);
-        fileUploadPage = new FileUploadPage(context);
-    }
-
     @Test
     public void userAccessesFileUploadPageAndUploadsFile()
     {
+        homepage = new HomePage(getContext(), getDriver());
+        fileUploadPage = new FileUploadPage(getContext(), getDriver());
+
         homepage.go()
                 .clickFileUploadLink()
                 .uploadFile(getFilePath.forTestImage())

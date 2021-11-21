@@ -10,10 +10,10 @@ public class SecureAreaPage
     private WebDriver driver;
     private By statusAlert = By.id("flash");
 
-    public SecureAreaPage(TestContext context)
+    public SecureAreaPage(TestContext context, WebDriver driver)
     {
         this.context = context;
-        this.driver = context.getDriver();
+        this.driver = driver;
     }
 
     public String getAlertText()

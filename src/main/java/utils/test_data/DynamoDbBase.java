@@ -1,3 +1,4 @@
+/*
 package utils.test_data;
 
 import com.amazonaws.regions.Regions;
@@ -51,3 +52,4 @@ public class DynamoDbBase
         }
     }
 }
+*/

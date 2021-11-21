@@ -12,10 +12,10 @@ public class LoginPage
     private By passwordField = By.id("password");
     private By loginButton = By.cssSelector("#login button");
 
-    public LoginPage(TestContext context)
+    public LoginPage(TestContext context, WebDriver driver)
     {
         this.context = context;
-        this.driver = context.getDriver();
+        this.driver = driver;
     }
 
     public LoginPage setUsername(String username)
@@ -33,6 +33,6 @@ public class LoginPage
     public SecureAreaPage clickLoginButton()
     {
         driver.findElement(loginButton).click();
-        return new SecureAreaPage(context);
+        return new SecureAreaPage(context, driver);
     }
 }

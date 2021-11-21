@@ -1,39 +1,32 @@
 package utils;
 
-import enums.RemoteBrowsers;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import utils.file_upload.FileUpload;
 import utils.file_upload.IFileUpload;
 
-import java.net.MalformedURLException;
-
 public class TestContext
 {
-    private WebDriver driver;
     private TestConfig config;
     private IFileUpload fileUploader;
+    private String testMethodName;
+    private BrowserStackSessionDetails browserStackSessionDetails;
 
-    public TestContext(TestConfig config) throws MalformedURLException
+    public TestContext setTestConfig(TestConfig config)
     {
         this.config = config;
-
-        if (config.getRemoteExec().equals("true"))
-        {
-            DesiredCapabilities caps = RemoteBrowsers.valueOf(config.getBrowser().toUpperCase()).getDesiredCapabilities();
-            driver = DriverFactory.createRemoteDriver(config);
-        }
-        else
-        {
-            driver = DriverFactory.createLocalDriver(config);
-        }
-
-        fileUploader = FileUpload.New(driver, config);
+        return this;
     }
 
-    public WebDriver getDriver()
+    public TestContext setTestMethodName(String testMethodName)
     {
-        return driver;
+        this.testMethodName = testMethodName;
+        return this;
+    }
+
+    public TestContext setFileUploader(WebDriver driver)
+    {
+        fileUploader = FileUpload.New(driver, config);
+        return this;
     }
 
     public TestConfig getConfig()
@@ -44,5 +37,19 @@ public class TestContext
     public IFileUpload getFileUploader()
     {
         return fileUploader;
+    }
+
+    public BrowserStackSessionDetails getBrowserStackSessionDetails()
+    {
+        return browserStackSessionDetails;
+    }
+
+    void setBrowserStackSessionDetails(WebDriver driver)
+    {
+        browserStackSessionDetails = new BrowserStackSessionDetails.BrowserStackSessionDetailsBuilder()
+                .withSessionId(driver)
+                .withBuildName(config.getBuildName())
+                .withTestCaseName(testMethodName)
+                .build();
     }
 }

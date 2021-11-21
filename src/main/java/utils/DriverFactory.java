@@ -2,6 +2,7 @@ package utils;
 
 import enums.RemoteBrowsers;
 import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.ios.IOSDriver;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -16,34 +17,60 @@ import java.util.concurrent.TimeUnit;
 
 public class DriverFactory
 {
-    private static WebDriver driver;
+    private static ThreadLocal<WebDriver> driver = new ThreadLocal<WebDriver>();
 
-    public static WebDriver createRemoteDriver(TestConfig config) throws MalformedURLException
+    public static WebDriver initialiseDriver(TestContext context)
     {
-        DesiredCapabilities caps = RemoteBrowsers.valueOf(config.getBrowser().toUpperCase()).getDesiredCapabilities();
+        if (context.getConfig().getRemoteExec().equals("true"))
+        {
+            DesiredCapabilities caps = RemoteBrowsers.valueOf(context.getConfig().getBrowser().toUpperCase()).getDesiredCapabilities();
+            caps.setCapability("build", context.getConfig().getBuildName());
+            try
+            {
+                driver.set(DriverFactory.createRemoteDriver(context.getConfig(), caps));
+            }
+            catch (MalformedURLException e)
+            {
+                e.printStackTrace();
+            }
 
+            context.setBrowserStackSessionDetails(driver.get());
+        }
+        else
+        {
+            driver.set(DriverFactory.createLocalDriver(context.getConfig()));
+        }
+
+        return driver.get();
+    }
+
+    private static WebDriver createRemoteDriver(TestConfig config, DesiredCapabilities caps) throws MalformedURLException
+    {
         switch (config.getBrowser())
         {
+            case "iphone":
+                driver.set(new IOSDriver<WebElement>(new URL(config.getBrowserStackUrl()), caps));
+                break;
             case "android_chrome":
-                driver = new AndroidDriver<WebElement>(new URL(config.getBrowserStackUrl()), caps);
+                driver.set(new AndroidDriver<WebElement>(new URL(config.getBrowserStackUrl()), caps));
                 break;
             case "chrome":
             case "firefox":
-                driver = new RemoteWebDriver(new URL(config.getBrowserStackUrl()), caps);
+                driver.set(new RemoteWebDriver(new URL(config.getBrowserStackUrl()), caps));
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + config.getBrowser());
         }
 
-        driver.manage().timeouts().implicitlyWait(Integer.parseInt(config.getImplicitWait()),
-                TimeUnit.MILLISECONDS);
+        driver.get().manage().timeouts().implicitlyWait(Integer.parseInt(config.getImplicitWait()),
+                TimeUnit.SECONDS);
 
-        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+        driver.get().manage().timeouts().pageLoadTimeout(60, TimeUnit.SECONDS);
 
-        return driver;
+        return driver.get();
     }
 
-    public static WebDriver createLocalDriver(TestConfig config)
+    private static WebDriver createLocalDriver(TestConfig config)
     {
         String browser;
 
@@ -59,21 +86,21 @@ public class DriverFactory
         switch (browser)
         {
             case "chrome":
-                driver = setUpChrome();
+                driver.set(setUpChrome());
                 break;
             case "firefox":
-                driver = setUpFirefox();
+                driver.set(setUpFirefox());
                 break;
             default:
                 throw new IllegalStateException("Unexpected value: " + browser);
         }
 
-        driver.manage().timeouts().implicitlyWait(Integer.parseInt(config.getImplicitWait()),
-                TimeUnit.MILLISECONDS);
+        driver.get().manage().timeouts().implicitlyWait(Integer.parseInt(config.getImplicitWait()),
+                TimeUnit.SECONDS);
 
-        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+        driver.get().manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
 
-        return driver;
+        return driver.get();
     }
 
     private static WebDriver setUpChrome()
@@ -86,5 +113,10 @@ public class DriverFactory
     {
         WebDriverManager.firefoxdriver().setup();
         return new FirefoxDriver();
+    }
+
+    public static WebDriver getDriver()
+    {
+        return driver.get();
     }
 }
